@@ -1,0 +1,38 @@
+server:
+  port: ${PORT:8083}
+  servlet:
+    session:
+      timeout: 30m
+spring:
+  application:
+    name: KSKBusinessMessagingPortal
+  data:
+    mongodb:
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://mongo:IhJUVijSXAkHtZamdCklWrFQZMBjYPEz@trolley.proxy.rlwy.net:42068/kskmessagingservice?ssl=false&authSource=admin}
+      auto-index-creation: true
+  thymeleaf:
+    cache: false
+  servlet:
+    multipart:
+      max-file-size: 15MB
+      max-request-size: 15MB
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+app:
+  security:
+    secure-cookie: ${SECURE_COOKIE:false}
+  csv:
+    max-rows: ${MAX_CSV_ROWS:50000}
+  batch:
+    enabled: ${BATCH_ENABLED:true}
+    cron: ${BATCH_CRON:0 */5 * * * *}
+    page-size: ${BATCH_PAGE_SIZE:5000}
+    max-attempts: ${BATCH_MAX_ATTEMPTS:3}
+    retry-delay-seconds: ${BATCH_RETRY_DELAY_SECONDS:300}
+  ksk:
+    base-url: ${KSK_MESSAGING_BASE_URL:http://localhost:8080}
+    connect-timeout-ms: 5000
+    read-timeout-ms: 30000

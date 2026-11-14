@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>CSV WhatsApp Bulk Sender</title>
+    <style>
+        *{box-sizing:border-box}body{margin:0;background:#f4f7fb;color:#182230;font:16px/1.5 system-ui,Arial,sans-serif}
+        main{max-width:850px;margin:42px auto;padding:0 16px}.card{background:white;border:1px solid #dce3ed;border-radius:18px;padding:28px;box-shadow:0 12px 30px #1831530d}
+        h1{margin:0 0 8px;font-size:clamp(26px,4vw,35px)}.muted{color:#667085}.notice{background:#eff6ff;border:1px solid #bfdbfe;padding:14px;border-radius:12px;margin:20px 0}
+        label{display:block;font-weight:700;margin:20px 0 8px}input[type=file]{width:100%;padding:14px;border:1px dashed #9aa9bd;border-radius:12px;background:#fbfdff}
+        button,.link{display:inline-block;padding:12px 18px;border:0;border-radius:10px;background:#155eef;color:white;font-weight:700;text-decoration:none;cursor:pointer}
+        .link{background:#eef4ff;color:#155eef}.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
+        table{width:100%;border-collapse:collapse;font-size:14px;margin-top:10px}td,th{border:1px solid #dce3ed;padding:8px;text-align:left}th{background:#f8fafc}code{background:#eaf0f7;padding:2px 5px;border-radius:4px}
+        #status{display:none;white-space:pre-wrap;overflow-wrap:anywhere;margin-top:22px;padding:16px;border-radius:12px}#status.ok{display:block;background:#ecfdf3;border:1px solid #abefc6}#status.err{display:block;background:#fff1f0;border:1px solid #fecdca}
+        footer{font-size:13px;color:#667085;margin-top:18px}@media(max-width:600px){main{margin:18px auto}.card{padding:19px}}
+    </style>
+</head>
+<body>
+<main>
+    <section class="card">
+        <h1>WhatsApp CSV Bulk Sender</h1>
+        <p class="muted">Upload a CSV file and send messages through your configured bulk-text API.</p>
+        <div class="notice"><strong>CSV format</strong>
+            <p>Headers: <code>to,body,previewUrl</code></p>
+            <table>
+                <thead>
+                <tr>
+                    <th>to</th>
+                    <th>body</th>
+                    <th>previewUrl</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>918008977520</td>
+                    <td>Hello from CSV</td>
+                    <td>true</td>
+                </tr>
+                <tr>
+                    <td>918523875047</td>
+                    <td>Visit https://example.com</td>
+                    <td>true</td>
+                </tr>
+                </tbody>
+            </table>
+            <p>The app always sends <code>previewUrl: true</code>. Use country code plus number, digits only.</p></div>
+        <form id="uploadForm"><label for="file">Choose CSV file</label><input id="file" name="file" type="file"
+                                                                              accept=".csv,text/csv" required>
+            <div class="actions">
+                <button id="sendButton" type="submit">Send bulk messages</button>
+                <a class="link" href="/sample.csv" download>Download sample CSV</a></div>
+        </form>
+        <div id="status" role="status" aria-live="polite"></div>
+        <footer>Use only numbers that have consented to receive messages. Before exposing this app publicly, add
+            login/authentication to protect bulk sending.
+        </footer>
+    </section>
+</main>
+<script>
+    const form=document.getElementById('uploadForm'),button=document.getElementById('sendButton'),box=document.getElementById('status');
+    form.addEventListener('submit',async e=>{e.preventDefault();const file=document.getElementById('file').files[0];if(!file)return;
+    const data=new FormData();data.append('file',file);button.disabled=true;button.textContent='Sending…';box.className='';box.style.display='block';box.textContent='Uploading CSV and calling bulk API…';
+    try{const r=await fetch('/api/csv/send-bulk',{method:'POST',body:data});const t=await r.text();let pretty;try{pretty=JSON.stringify(JSON.parse(t),null,2)}catch(_){pretty=t||'(empty response)'}
+    box.className=r.ok?'ok':'err';box.textContent='HTTP status: '+r.status+'\n'+pretty;}catch(err){box.className='err';box.textContent='Request failed: '+err.message;}finally{button.disabled=false;button.textContent='Send bulk messages';}});
+</script>
+</body>
+</html>
