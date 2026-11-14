@@ -1,11 +1,38 @@
 server:
-  port: ${PORT:8081}
+  port: ${PORT:8082}
+  servlet:
+    session:
+      timeout: 30m
 spring:
+  application:
+    name: KSKBusinessMessagingPortal
+  data:
+    mongodb:
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://sampathkallem7_db_user:Vq8WQuDOzKaZwvnE@ac-eya4cwn-shard-00-00.xest6rc.mongodb.net:27017,ac-eya4cwn-shard-00-01.xest6rc.mongodb.net:27017,ac-eya4cwn-shard-00-02.xest6rc.mongodb.net:27017/kskmessagingservice?replicaSet=atlas-9jf09j-shard-0&ssl=true&authSource=admin}
+      auto-index-creation: true
+  thymeleaf:
+    cache: false
   servlet:
     multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
-whatsapp:
-  bulk-api-url: ${WHATSAPP_BULK_API_URL:https://kskmessagingservice-production.up.railway.app/api/whatsapp/send/bulk/text}
+      max-file-size: 15MB
+      max-request-size: 15MB
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
 app:
-  max-csv-rows: ${MAX_CSV_ROWS:5000}
+  security:
+    secure-cookie: ${SECURE_COOKIE:false}
+  csv:
+    max-rows: ${MAX_CSV_ROWS:50000}
+  batch:
+    enabled: ${BATCH_ENABLED:true}
+    cron: ${BATCH_CRON:0 */5 * * * *}
+    page-size: ${BATCH_PAGE_SIZE:5000}
+    max-attempts: ${BATCH_MAX_ATTEMPTS:3}
+    retry-delay-seconds: ${BATCH_RETRY_DELAY_SECONDS:300}
+  ksk:
+    base-url: ${KSK_MESSAGING_BASE_URL:http://localhost:8080}
+    connect-timeout-ms: 5000
+    read-timeout-ms: 30000
