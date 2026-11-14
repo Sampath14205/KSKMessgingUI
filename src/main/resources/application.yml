@@ -8,7 +8,7 @@ spring:
     name: KSKBusinessMessagingPortal
   data:
     mongodb:
-      uri: ${SPRING_DATA_MONGODB_URI:mongodb://sampathkallem7_db_user:Vq8WQuDOzKaZwvnE@ac-eya4cwn-shard-00-00.xest6rc.mongodb.net:27017,ac-eya4cwn-shard-00-01.xest6rc.mongodb.net:27017,ac-eya4cwn-shard-00-02.xest6rc.mongodb.net:27017/kskmessagingservice?replicaSet=atlas-9jf09j-shard-0&ssl=true&authSource=admin}
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://mongo:IhJUVijSXAkHtZamdCklWrFQZMBjYPEz@trolley.proxy.rlwy.net:42068/kskmessagingservice?ssl=false&authSource=admin}
       auto-index-creation: true
   thymeleaf:
     cache: false
