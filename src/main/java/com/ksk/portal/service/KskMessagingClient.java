@@ -19,7 +19,7 @@ public class KskMessagingClient {
     public String send(MessageJob job, String businessName) {
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("businessId", job.getBusinessId());
-        payload.put("businessName", businessName);
+       // payload.put("businessName", businessName);
         payload.put("to", job.getPhoneNumber());
         String path;
         if ("TEMPLATE".equals(job.getMessageType())) {
