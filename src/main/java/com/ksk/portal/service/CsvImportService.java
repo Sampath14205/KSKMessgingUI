@@ -32,7 +32,7 @@ public class CsvImportService {
             Map<String, Integer> h = new HashMap<>();
             parser.getHeaderMap().forEach((k, v) -> h.put(k.trim().toLowerCase(Locale.ROOT), v));
             if (!h.containsKey("to") || (!h.containsKey("body") && !h.containsKey("templatename")))
-                throw new IllegalArgumentException("CSV needs 'to' and either 'body' or 'templateName' columns.");
+                throw new IllegalArgumentException("CSV needs 'to' and either 'body' or 'templateName' columns. For image templates, add an optional 'imageUrl' column.");
             int rowNo = 1;
             for (CSVRecord row : parser) {
                 rowNo++;
@@ -54,6 +54,11 @@ public class CsvImportService {
                     j.setTemplateName(template);
                     j.setLanguageCode(or(col(row, h.get("languagecode")), "en_US"));
                     j.setTemplateParameters(split(col(row, h.get("parameters"))));
+                    String imageUrl = col(row, h.containsKey("imageurl") ? h.get("imageurl") : h.get("headerimageurl"));
+                    if (!imageUrl.isBlank()) {
+                        if (!imageUrl.matches("(?i)^https://.+")) throw new IllegalArgumentException("CSV row " + rowNo + ": imageUrl must be a public HTTPS URL.");
+                        j.setImageUrl(imageUrl);
+                    }
                 } else {
                     j.setMessageType("TEXT");
                     j.setMessageBody(body);

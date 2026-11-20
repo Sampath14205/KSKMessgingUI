@@ -53,4 +53,7 @@ public class PageController {
     public String settings() {
         return "settings";
     }
+
+    @GetMapping("/whatsapp-config")
+    public String whatsappConfig() { return "whatsapp-config"; }
 }

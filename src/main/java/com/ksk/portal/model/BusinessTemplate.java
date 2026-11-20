@@ -1,6 +1,7 @@
 package com.ksk.portal.model;
 
 import java.time.Instant;
+import java.util.*;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
@@ -11,9 +12,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class BusinessTemplate {
     @Id
     private String id;
-    private String businessId, name, languageCode, category, bodyText;
-    private java.util.List<String> placeholders;
-    private Instant createdAt = Instant.now();
+    private String businessId, name, languageCode, category, parameterFormat, headerType, headerText, headerMediaUrl, bodyText, footerText;
+    private List<String> placeholders = new ArrayList<>(), examples = new ArrayList<>();
+    private List<Map<String, Object>> buttons = new ArrayList<>(), components = new ArrayList<>();
+    private Instant createdAt = Instant.now(), updatedAt = Instant.now();
 
     public String getId() {
         return id;
@@ -55,6 +57,38 @@ public class BusinessTemplate {
         category = v;
     }
 
+    public String getParameterFormat() {
+        return parameterFormat;
+    }
+
+    public void setParameterFormat(String v) {
+        parameterFormat = v;
+    }
+
+    public String getHeaderType() {
+        return headerType;
+    }
+
+    public void setHeaderType(String v) {
+        headerType = v;
+    }
+
+    public String getHeaderText() {
+        return headerText;
+    }
+
+    public void setHeaderText(String v) {
+        headerText = v;
+    }
+
+    public String getHeaderMediaUrl() {
+        return headerMediaUrl;
+    }
+
+    public void setHeaderMediaUrl(String v) {
+        headerMediaUrl = v;
+    }
+
     public String getBodyText() {
         return bodyText;
     }
@@ -63,15 +97,59 @@ public class BusinessTemplate {
         bodyText = v;
     }
 
-    public java.util.List<String> getPlaceholders() {
+    public String getFooterText() {
+        return footerText;
+    }
+
+    public void setFooterText(String v) {
+        footerText = v;
+    }
+
+    public List<String> getPlaceholders() {
         return placeholders;
     }
 
-    public void setPlaceholders(java.util.List<String> v) {
+    public void setPlaceholders(List<String> v) {
         placeholders = v;
+    }
+
+    public List<String> getExamples() {
+        return examples;
+    }
+
+    public void setExamples(List<String> v) {
+        examples = v;
+    }
+
+    public List<Map<String, Object>> getButtons() {
+        return buttons;
+    }
+
+    public void setButtons(List<Map<String, Object>> v) {
+        buttons = v;
+    }
+
+    public List<Map<String, Object>> getComponents() {
+        return components;
+    }
+
+    public void setComponents(List<Map<String, Object>> v) {
+        components = v;
     }
 
     public Instant getCreatedAt() {
         return createdAt;
+    }
+
+    public void setCreatedAt(Instant v) {
+        createdAt = v;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Instant v) {
+        updatedAt = v;
     }
 }

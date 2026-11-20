@@ -29,6 +29,7 @@ public class KskMessagingClient {
             payload.put("templateName", job.getTemplateName());
             payload.put("languageCode", job.getLanguageCode() == null ? "en_US" : job.getLanguageCode());
             payload.put("bodyParameters", job.getTemplateParameters() == null ? List.of() : job.getTemplateParameters());
+            if (job.getImageUrl() != null && !job.getImageUrl().isBlank()) payload.put("image", job.getImageUrl());
             path = "/api/whatsapp/send/template";
         } else {
             payload.put("body", job.getMessageBody());
@@ -42,6 +43,7 @@ public class KskMessagingClient {
             path = "/api/whatsapp/send/text";
         }
         System.out.println("==============="+path);
-        return client.post().uri(path).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON).body(request).retrieve().body(String.class);
+        return client.post().uri(path).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
+                .body("TEMPLATE".equals(job.getMessageType()) ? payload : request).retrieve().body(String.class);
     }
 }

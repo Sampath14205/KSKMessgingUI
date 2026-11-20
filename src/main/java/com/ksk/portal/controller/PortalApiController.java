@@ -62,12 +62,25 @@ public class PortalApiController {
     }
 
     @PostMapping("/templates")
-    public BusinessTemplate createTemplate(@RequestParam String name, @RequestParam(defaultValue = "en_US") String languageCode, @RequestParam(defaultValue = "UTILITY") String category, @RequestParam String bodyText, @RequestParam(required = false) String placeholders) {
-        return templates.save(name, languageCode, category, bodyText, placeholders);
+    public BusinessTemplate createTemplate(@RequestBody Map<String, Object> request) {
+        return templates.save(request);
+    }
+
+    @PutMapping("/templates/{id}")
+    public BusinessTemplate updateTemplate(@PathVariable String id, @RequestBody Map<String, Object> request) {
+        return templates.update(id, request);
+    }
+
+    @GetMapping("/whatsapp-config")
+    public Map<String, Object> whatsappConfig() { return templates.getWhatsAppConfig(); }
+
+    @PutMapping("/whatsapp-config")
+    public Map<String, Object> saveWhatsAppConfig(@RequestBody Map<String, Object> request) {
+        return templates.saveWhatsAppConfig(request);
     }
 
     @PostMapping("/quick-send")
-    public Map<String, Object> quick(@RequestParam String to, @RequestParam String type, @RequestParam(required = false) String body, @RequestParam(required = false) String templateName, @RequestParam(defaultValue = "en_US") String languageCode, @RequestParam(required = false) String parameters) {
+    public Map<String, Object> quick(@RequestParam String to, @RequestParam String type, @RequestParam(required = false) String body, @RequestParam(required = false) String templateName, @RequestParam(defaultValue = "en_US") String languageCode, @RequestParam(required = false) String parameters, @RequestParam(required = false) String imageUrl) {
         String phone = to.replace("+", "");
         if (!phone.matches("[0-9]{8,15}"))
             throw new IllegalArgumentException("Enter a valid phone number with country code.");
@@ -79,6 +92,10 @@ public class PortalApiController {
         j.setTemplateName(templateName);
         j.setLanguageCode(languageCode);
         j.setTemplateParameters(parameters == null ? List.of() : Arrays.stream(parameters.split("\\|")).map(String::trim).toList());
+        if (imageUrl != null && !imageUrl.isBlank()) {
+            if (!imageUrl.matches("(?i)^https://.+")) throw new IllegalArgumentException("Image URL must be a public HTTPS URL.");
+            j.setImageUrl(imageUrl);
+        }
         String response = sender.send(j, current.user().getBusinessName());
         return Map.of("success", true, "response", response == null ? "" : response);
     }

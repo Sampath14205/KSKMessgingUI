@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class MessageJob {
     @Id
     private String id;
-    private String businessId, csvFileName, phoneNumber, messageType, messageBody, templateName, languageCode, status, providerMessageId, lastError;
+    private String businessId, csvFileName, phoneNumber, messageType, messageBody, templateName, languageCode, imageUrl, status, providerMessageId, lastError;
     private java.util.List<String> templateParameters;
     private Instant createdAt = Instant.now(), updatedAt = Instant.now(), nextAttemptAt = Instant.now(), sentAt;
     private int attempts;
@@ -87,6 +87,9 @@ public class MessageJob {
     public void setTemplateParameters(java.util.List<String> v) {
         templateParameters = v;
     }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String v) { imageUrl = v; }
 
     public String getStatus() {
         return status;
