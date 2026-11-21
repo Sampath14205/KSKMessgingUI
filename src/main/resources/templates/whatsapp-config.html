@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>KSK Messaging | WhatsApp configuration</title><link rel="stylesheet" href="/css/portal.css"></head>
+<body><div class="shell"><aside class="sidebar"><div class="brand"><img src="/images/ksk-logo.png"><span>KSK <b>MESSAGING</b></span></div><nav><a href="/dashboard">▦ &nbsp; Overview</a><a class="active" href="/whatsapp-config">☷ &nbsp; WhatsApp configuration</a><a href="/settings">⚙ &nbsp; Account settings</a></nav><form method="post" action="/logout"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><button class="logout">↪ &nbsp; Sign out</button></form><div class="side-note">Secure business workspace</div></aside>
+<main class="main"><header class="topbar"><div><div class="eyebrow">BUSINESS INTEGRATION</div><h1>WhatsApp configuration</h1><p class="muted">Edit this business's document in the <code>whatsapp_configurations</code> MongoDB collection.</p></div><a class="btn light" href="/dashboard">← Dashboard</a></header>
+<section class="panel"><div class="panel-head"><div><div class="eyebrow">META CLOUD API</div><h2>Connection settings</h2></div><span class="pill">Business scoped</span></div><p class="muted">The editor loads all existing fields for your business and retains additional fields that are not listed below. Keep tokens private.</p><form id="configForm"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><div class="form-grid" id="knownFields">
+<label>Graph API base URL<input name="graphUrl" placeholder="https://graph.facebook.com"></label>
+<label>Graph API version<input name="graphVersion" placeholder="v23.0"></label>
+<label>WhatsApp Phone Number ID<input name="phoneNumberId"></label>
+<label>WhatsApp Business Account ID (WABA)<input name="wabaId"></label>
+<label>Meta App ID<input name="appId"></label>
+<label>Meta App Secret<input name="appSecret" type="password" autocomplete="new-password"></label>
+<label class="span2">Permanent / System User Access Token<input name="accessToken" type="password" autocomplete="new-password"></label>
+<label>Webhook Verify Token<input name="verifyToken" type="password" autocomplete="new-password"></label>
+<label>Webhook Callback URL<input name="webhookCallbackUrl" type="url" placeholder="https://your-domain.com/webhook"></label>
+<label>Business ID<input name="businessId" readonly></label>
+</div><div class="divider-line"></div><div class="panel-head"><div><div class="eyebrow">OTHER COLLECTION FIELDS</div><h2>Additional configuration fields</h2></div><button type="button" class="btn light" id="addConfigField">+ Add field</button></div><p class="muted small">Existing extra keys in this MongoDB document appear here. Values are JSON-aware: enter a string, number, boolean, array or object.</p><div id="extraFields"></div><div class="form-actions"><button class="btn primary">Save WhatsApp configuration</button><button class="btn light" type="button" id="reloadConfig">Reload from database</button></div></form><div id="configResult" class="result"></div></section><footer>Credentials are stored in MongoDB for this business. Restrict database and portal access appropriately.</footer></main></div><script src="/js/whatsapp-config.js"></script></body></html>

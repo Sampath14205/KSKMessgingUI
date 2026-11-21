@@ -1,0 +1,12 @@
+const form=document.getElementById('configForm');
+const csrf=()=>form.querySelector('input[name="_csrf"]').value;
+const known=['businessId','graphUrl','graphVersion','phoneNumberId','wabaId','appId','appSecret','accessToken','verifyToken','webhookCallbackUrl'];
+const extra=document.getElementById('extraFields');
+function result(msg,ok){const e=document.getElementById('configResult');e.className='result '+(ok?'ok':'err');e.textContent=msg;}
+function addExtra(key='',value=''){const row=document.createElement('div');row.className='config-extra';const k=document.createElement('input');k.placeholder='Field name';k.value=key;k.className='extra-key';const v=document.createElement('textarea');v.rows=2;v.placeholder='JSON value (e.g. "value", 123, true, { })';v.className='extra-value';v.value=JSON.stringify(value);const del=document.createElement('button');del.type='button';del.className='btn light';del.textContent='Remove';del.onclick=()=>row.remove();row.append(k,v,del);extra.append(row);}
+async function load(){try{const r=await fetch('/api/whatsapp-config');if(!r.ok)throw new Error('Unable to load configuration ('+r.status+').');const d=await r.json();known.forEach(k=>{const el=form.elements.namedItem(k);if(el)el.value=d[k]??'';});extra.innerHTML='';Object.entries(d).filter(([k])=>!known.includes(k)&&k!=='_id'&&k!=='updatedAt').forEach(([k,v])=>addExtra(k,v));result('Configuration loaded from whatsapp_configurations.',true);}catch(e){result(e.message,false);}}
+form.addEventListener('submit',async e=>{e.preventDefault();try{const payload={};known.forEach(k=>{const el=form.elements.namedItem(k);if(el)payload[k]=el.value.trim();});payload.businessId=form.elements.businessId.value;for(const row of extra.children){const k=row.querySelector('.extra-key').value.trim();const raw=row.querySelector('.extra-value').value.trim();if(!k)continue;if(known.includes(k)||k==='_id')throw new Error('Additional field duplicates a protected field: '+k);try{payload[k]=JSON.parse(raw);}catch{payload[k]=raw;}}
+const r=await fetch('/api/whatsapp-config',{method:'PUT',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':csrf()},body:JSON.stringify(payload)});const d=await r.json();if(!r.ok)throw new Error(d.error||d.message||'Save failed.');result('WhatsApp configuration saved successfully.',true);await load();}catch(x){result(x.message,false);}});
+document.getElementById('addConfigField').addEventListener('click',()=>addExtra());
+document.getElementById('reloadConfig').addEventListener('click',load);
+load();
