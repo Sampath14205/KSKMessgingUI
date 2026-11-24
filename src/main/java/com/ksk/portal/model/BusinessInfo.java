@@ -13,7 +13,18 @@ public class BusinessInfo {
     @Indexed(unique = true)
     private String businessId;
     private String businessName, legalName, email, phone, website, address;
+    private boolean isActive = true;
+    private Instant warrantyUpdatedAt = Instant.now();
     private Instant createdAt = Instant.now(), updatedAt = Instant.now();
+
+    public boolean isActive() { return isActive; }
+    public void setActive(boolean active) { isActive = active; }
+    public Instant getWarrantyUpdatedAt() { return warrantyUpdatedAt; }
+    public String getWarrantyDate() { return warrantyUpdatedAt == null ? "" : warrantyUpdatedAt.atZone(java.time.ZoneOffset.UTC).toLocalDate().toString(); }
+    public void setWarrantyUpdatedAt(Instant value) { warrantyUpdatedAt = value; }
+    public Instant getCreatedAt() { return createdAt; }
+    public Instant getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(Instant value) { updatedAt = value; }
 
     public String getId() {
         return id;

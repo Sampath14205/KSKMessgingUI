@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Upload image | KSK Messaging</title>
+    <link rel="stylesheet" href="/css/portal.css">
+</head>
+<body>
+<div class="shell">
+    <aside class="sidebar">
+        <div class="brand"><img src="/images/ksk-logo.png" alt="KSK"><span>KSK <b>MESSAGING</b></span></div>
+        <nav><a href="/dashboard">▦ &nbsp; Quick message</a><a href="/dashboard#upload">⇧ &nbsp; CSV uploading</a><a
+                class="active" href="/image-upload">▧ &nbsp; Image uploading</a><a href="/dashboard#history">◷ &nbsp;
+            Message history</a><a href="/settings">⚙ &nbsp; Account settings</a></nav>
+        <form method="post" action="/logout"><input type="hidden" th:name="${_csrf.parameterName}"
+                                                    th:value="${_csrf.token}">
+            <button class="logout">↪ &nbsp; Sign out</button>
+        </form>
+        <div class="side-note">Secure business workspace</div>
+    </aside>
+    <main class="main">
+        <header class="topbar">
+            <div>
+                <div class="eyebrow">BUSINESS WORKSPACE</div>
+                <h1>Image uploading</h1>
+                <p class="muted">Upload an image through your KSK Messaging Service API. Your saved URL remains
+                    available here for future reference.</p></div>
+        </header>
+        <section class="panel" style="max-width:850px"><h2>Upload template image</h2>
+            <p class="muted">The portal sends your image to <code>KSK_MESSAGING_BASE_URL/api/images/upload</code> and
+                saves the returned URL in your business template in <code>portal_business_templates</code>.</p>
+            <form id="imageForm"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><label
+                    class="dropzone"><span class="upload-icon">⇧</span><b>Choose image</b><small>Image files only ·
+                maximum 10 MB</small><input id="imageFile" type="file" accept="image/*" required></label>
+                <button class="btn primary">Upload image</button>
+            </form>
+            <div id="imageResult" class="result" role="status"></div>
+            <div id="imageHistory" style="margin-top:14px"></div>
+            <div id="savedImage" class="muted" style="margin-top:18px">Loading saved image URL…</div>
+        </section>
+        <footer>© KSK Messaging · Secure business workspace</footer>
+    </main>
+</div>
+<script>
+    const csrf=document.querySelector('input[name="_csrf"]')?.value||'';
+    function renderSavedImage(url,name){const box=document.getElementById('savedImage');box.replaceChildren();if(!url){box.textContent='No image uploaded yet.';return;}const label=document.createElement('p');label.textContent='Saved image'+(name?' for template '+name:'')+':';const link=document.createElement('a');link.href=url;link.textContent=url;link.target='_blank';link.rel='noopener';box.append(label,link);}
+    fetch('/api/image-url').then(r=>{if(!r.ok)throw Error('Could not load saved image.');return r.json();}).then(x=>renderSavedImage(x.imageUrl,x.templateName)).catch(()=>{document.getElementById('savedImage').textContent='Could not load the saved image URL.';});
+    document.getElementById('imageForm').addEventListener('submit',async e=>{e.preventDefault();const file=document.getElementById('imageFile').files[0];if(!file)return;const data=new FormData();data.append('file',file);const result=document.getElementById('imageResult');result.textContent='Uploading…';result.className='result';try{const response=await fetch('/api/image-upload',{method:'POST',headers:{'X-CSRF-TOKEN':csrf},body:data});const payload=await response.json();if(!response.ok)throw Error(payload.message||payload.error||'Image upload failed.');result.textContent=payload.message||'Image uploaded successfully.';result.className='result ok';renderSavedImage(payload.imageUrl);const link=document.createElement('a');link.href=payload.imageUrl;link.textContent='Open uploaded image';link.target='_blank';link.rel='noopener';document.getElementById('imageHistory').prepend(link);e.target.reset();}catch(error){result.textContent=error.message;result.className='result err';}});
+</script>
+</body>
+</html>

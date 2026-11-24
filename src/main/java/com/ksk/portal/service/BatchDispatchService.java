@@ -17,16 +17,17 @@ import org.springframework.stereotype.Service;
 public class BatchDispatchService {
     private final MongoTemplate mongo;
     private final PortalUserRepository users;
+    private final BusinessInfoRepository businesses;
     private final KskMessagingClient sender;
     private final int pageSize, maxAttempts, retryDelay;
     @Value("${app.batch.enabled:true}")
     private boolean enabled;
 
-    public BatchDispatchService(MongoTemplate mongo, PortalUserRepository users, KskMessagingClient sender,
+    public BatchDispatchService(MongoTemplate mongo, PortalUserRepository users, BusinessInfoRepository businesses, KskMessagingClient sender,
                                 @Value("${app.batch.page-size:5000}") int pageSize, @Value("${app.batch.max-attempts:3}") int maxAttempts,
                                 @Value("${app.batch.retry-delay-seconds:300}") int retryDelay) {
         this.mongo = mongo;
-        this.users = users;
+        this.users = users; this.businesses = businesses;
         this.sender = sender;
         this.pageSize = pageSize;
         this.maxAttempts = maxAttempts;
@@ -51,6 +52,8 @@ public class BatchDispatchService {
 
     private void sendOne(MessageJob j) {
         try {
+            var businessInfo = businesses.findByBusinessId(j.getBusinessId()).orElseThrow(() -> new IllegalStateException("Business information not found"));
+            if (!businessInfo.isActive()) throw new IllegalStateException("Business account is inactive. Message dispatch blocked.");
             PortalUser business = users.findByBusinessId(j.getBusinessId()).orElseThrow(() -> new IllegalStateException("Business account not found"));
             String response = sender.send(j, business.getBusinessName());
             j.setStatus("SENT");

@@ -49,11 +49,18 @@ public class PageController {
         return "dashboard";
     }
 
+    @GetMapping("/image-upload")
+    public String imageUpload() {
+        return "image-upload";
+    }
+
     @GetMapping("/settings")
     public String settings() {
         return "settings";
     }
 
     @GetMapping("/whatsapp-config")
-    public String whatsappConfig() { return "whatsapp-config"; }
+    public String whatsappConfig() {
+        return "whatsapp-config";
+    }
 }

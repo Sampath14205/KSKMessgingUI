@@ -73,3 +73,22 @@ The scheduler runs every five minutes by default and processes up to 5,000 pendi
 - Protect MongoDB credentials, App Secret and access tokens. The portal requires authentication for the configuration page and its APIs. Restrict database access and use HTTPS in production.
 - The portal's template builder stores definitions locally; Meta approval still happens through Meta Business Manager / WhatsApp Manager or a separately integrated Meta template API.
 - Send only to opted-in recipients and follow Meta's WhatsApp Business policies.
+
+
+## Admin dashboard and business warranty controls
+
+- Admin username is fixed as `KskMSAdmin`; configure its password with `ADMIN_PASSWORD` in the process environment. No admin password is stored in MongoDB. Set a strong secret before starting the service; startup fails if `ADMIN_PASSWORD` is blank.
+- Admin dashboard: `/admin`. It lists businesses, toggles active status, updates warranty date, manages templates across businesses, and lists/adds/edits WhatsApp configurations. Deactivation also disables the associated business login and prevents queued batch jobs from being dispatched.
+- `business_info` now includes `isActive` (new records default to true), `warrantyUpdatedAt`, and `updatedAt`. Legacy documents without `isActive` are treated as active by the Java primitive default.
+
+## Business image upload
+
+The user dashboard posts the selected image to the KSK Messaging Service endpoint `POST {KSK_MESSAGING_BASE_URL}/api/images/upload` as multipart form data using the `file` field. The URL returned by that API is saved to the latest matching document in the existing `portal_business_templates` collection (`imageUrl`, `updatedAt`). The image-upload page uses the same persistent sidebar as the main business dashboard. No direct S3/R2 SDK, credentials, or bucket configuration is used by this portal.
+
+## CSV format
+
+The sample file is `phoneNumber,message`. CSV uploads always queue `TEMPLATE` jobs and resolve the template name (`name`) and image URL (`imageUrl`, falling back to `headerMediaUrl`) from the latest template for that business in `portal_business_templates`. Upload is rejected if the business is inactive or has no template in that collection. The `message` value is stored as the job message and split on `|` into template body parameters.
+
+## Admin dashboard
+
+The admin sidebar links to Business info, Templates, WhatsApp configuration, and Logout. Admin template listing, creation, and editing all use the existing `portal_business_templates` collection. Business status and warranty date updates use the admin API with CSRF protection configured for the portal's AJAX header.

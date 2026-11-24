@@ -12,7 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class BusinessTemplate {
     @Id
     private String id;
-    private String businessId, name, languageCode, category, parameterFormat, headerType, headerText, headerMediaUrl, bodyText, footerText;
+    private String businessId, imageUrl, name, languageCode, category, parameterFormat, headerType, headerText, headerMediaUrl, bodyText, footerText;
     private List<String> placeholders = new ArrayList<>(), examples = new ArrayList<>();
     private List<Map<String, Object>> buttons = new ArrayList<>(), components = new ArrayList<>();
     private Instant createdAt = Instant.now(), updatedAt = Instant.now();
@@ -32,6 +32,9 @@ public class BusinessTemplate {
     public void setBusinessId(String v) {
         businessId = v;
     }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String value) { imageUrl = value; }
 
     public String getName() {
         return name;

@@ -23,20 +23,47 @@ public class PortalApiController {
     private final TemplateService templates;
     private final KskMessagingClient sender;
     private final PortalUserRepository users;
+    private final KskImageUploadService imageUploadService;
+    private final BusinessTemplateRepository templateRepo;
 
-    public PortalApiController(CurrentBusiness c, CsvImportService csv, SignupService signup, MessageJobRepository jobs, TemplateService templates, KskMessagingClient sender, PortalUserRepository users) {
+    public PortalApiController(CurrentBusiness c, CsvImportService csv, SignupService signup, MessageJobRepository jobs, TemplateService templates, KskMessagingClient sender, PortalUserRepository users, KskImageUploadService imageUploadService, BusinessTemplateRepository templateRepo) {
         this.current = c;
         this.csv = csv;
         this.signup = signup;
         this.jobs = jobs;
         this.templates = templates;
         this.sender = sender;
-        this.users = users;
+        this.users = users; this.imageUploadService = imageUploadService; this.templateRepo = templateRepo;
     }
 
     @PostMapping(value = "/csv", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Map<String, Object> upload(@RequestParam("file") MultipartFile file) throws Exception {
+        current.requireActive();
         return Map.of("success", true, "queuedMessages", csv.importCsv(current.id(), file), "message", "CSV rows saved for scheduled dispatch.");
+    }
+
+
+    @PostMapping(value="/image-upload", consumes=MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Map<String,Object> uploadImage(@RequestParam("file") MultipartFile file) throws Exception {
+        current.requireActive();
+        if (file == null || file.isEmpty()) throw new IllegalArgumentException("Choose an image to upload.");
+        String type = file.getContentType() == null ? "" : file.getContentType().toLowerCase(Locale.ROOT);
+        if (!type.startsWith("image/")) throw new IllegalArgumentException("Only image files are allowed.");
+        if (file.getSize() > 10L * 1024 * 1024) throw new IllegalArgumentException("Image size must not exceed 10 MB.");
+        BusinessTemplate template = templateRepo.findFirstByBusinessIdOrderByCreatedAtDesc(current.id())
+                .orElseThrow(() -> new IllegalStateException("No template is configured for this business. Ask the administrator to create a template first."));
+        String url = imageUploadService.upload(file,current.id());
+        template.setImageUrl(url);
+        template.setUpdatedAt(java.time.Instant.now());
+        templateRepo.save(template);
+        return Map.of("success", true, "imageUrl", url, "message", "Image uploaded through KSK Messaging Service and saved to your business template.");
+    }
+
+    @GetMapping("/image-url")
+    public Map<String,Object> imageUrl() {
+        return templateRepo.findFirstByBusinessIdOrderByCreatedAtDesc(current.id())
+                .map(t -> Map.<String,Object>of("templateName", t.getName() == null ? "" : t.getName(), "imageUrl", t.getImageUrl() == null ? "" : t.getImageUrl()))
+                .orElse(Map.of("imageUrl", ""));
     }
 
     @GetMapping("/history")
@@ -81,6 +108,7 @@ public class PortalApiController {
 
     @PostMapping("/quick-send")
     public Map<String, Object> quick(@RequestParam String to, @RequestParam String type, @RequestParam(required = false) String body, @RequestParam(required = false) String templateName, @RequestParam(defaultValue = "en_US") String languageCode, @RequestParam(required = false) String parameters, @RequestParam(required = false) String imageUrl) {
+        current.requireActive();
         String phone = to.replace("+", "");
         if (!phone.matches("[0-9]{8,15}"))
             throw new IllegalArgumentException("Enter a valid phone number with country code.");

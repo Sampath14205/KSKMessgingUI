@@ -38,6 +38,7 @@ public class SignupService {
         b.setLegalName(u.getBusinessName());
         b.setEmail(u.getEmail());
         b.setPhone(u.getPhone());
+        b.setActive(true);
         businesses.save(b);
     }
 

@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>KSK Messaging | Admin</title>
+    <link rel="stylesheet" href="/css/portal.css">
+    <style>
+        .admin-shell{min-height:100vh}.admin-sidebar{position:fixed;inset:0 auto 0 0;width:250px;background:#10271e;color:#eaf8f0;padding:26px 18px;display:flex;flex-direction:column;z-index:5}.admin-sidebar .brand{margin:0 10px 42px}.admin-sidebar nav{display:grid;gap:8px}.admin-sidebar nav a{padding:12px 14px;border-radius:10px;color:#b7cfc2;font-weight:600}.admin-sidebar nav a:hover,.admin-sidebar nav a.active{background:#1a3b2c;color:#fff}.admin-sidebar nav a.active{box-shadow:inset 3px 0 #18c96b}.admin-sidebar form{margin-top:auto}.admin-sidebar .logout{color:#b7cfc2}.admin-main{margin-left:250px;padding:30px clamp(18px,3vw,48px);max-width:1800px}.admin-section{background:#fff;border:1px solid #e4ece7;border-radius:15px;padding:20px;margin:18px 0;scroll-margin-top:18px}.admin-section h2{margin:0 0 10px}.admin-table{width:100%;border-collapse:collapse;font-size:12px;min-width:850px}.admin-table th,.admin-table td{padding:10px;border-bottom:1px solid #e4ece7;text-align:left;vertical-align:middle}.admin-table input{min-width:115px;padding:8px}.admin-table button,.admin-main button{padding:8px 11px;border:0;border-radius:8px;cursor:pointer;background:#183c2b;color:#fff;font-weight:650}.admin-form{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.admin-form input{width:auto;min-width:150px;flex:1}.admin-table-wrap{overflow:auto}.admin-main .muted{color:#6d7b75}.admin-main .admin-top{display:flex;justify-content:space-between;align-items:center;gap:20px}.admin-main .admin-top h1{margin:4px 0}.admin-main .admin-result{position:sticky;bottom:8px;background:#fff;padding:8px;border-radius:8px;z-index:2}@media(max-width:760px){.admin-sidebar{position:static;width:auto;padding:12px;display:block}.admin-sidebar .brand{margin:0 6px 12px}.admin-sidebar nav{grid-template-columns:repeat(2,1fr);display:grid}.admin-sidebar nav a{font-size:12px;padding:8px}.admin-sidebar form{display:none}.admin-main{margin:0;padding:18px 12px}.admin-main .admin-top{align-items:flex-start;flex-direction:column}}
+    </style>
+</head>
+<body>
+<div class="admin-shell">
+    <aside class="admin-sidebar">
+        <div class="brand"><img src="/images/ksk-logo.png" alt="KSK"><span>KSK <b>MESSAGING</b></span></div>
+        <nav><a class="active" href="#businessInfo">▦ &nbsp; Business info</a><a href="#templates">▧ &nbsp;
+            Templates</a><a href="#configurations">⚙ &nbsp; WhatsApp config</a></nav>
+        <form method="post" action="/logout"><input type="hidden" th:name="${_csrf.parameterName}"
+                                                    th:value="${_csrf.token}">
+            <button class="logout">↪ &nbsp; Logout</button>
+        </form>
+        <div class="side-note">Administrator workspace</div>
+    </aside>
+    <main class="admin-main">
+        <header class="admin-top">
+            <div>
+                <div class="eyebrow">KSK MESSAGING · CONTROL CENTER</div>
+                <h1>Admin dashboard</h1>
+                <p class="muted">Manage business access, warranty dates, templates and WhatsApp configurations.</p>
+            </div>
+        </header>
+        <section class="admin-section" id="businessInfo"><h2>Business information</h2>
+            <p class="muted">Change the warranty updated date to extend the business warranty. Deactivation also
+                disables the associated business login.</p>
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                    <tr>
+                        <th>Business</th>
+                        <th>Business ID</th>
+                        <th>Email / Phone</th>
+                        <th>Status</th>
+                        <th>Warranty updated date</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="b : ${businesses}" th:attr="data-business-id=${b.businessId},data-active=${b.active}">
+                        <td th:text="${b.businessName}"></td>
+                        <td th:text="${b.businessId}"></td>
+                        <td><span th:text="${b.email}"></span><br><span th:text="${b.phone}"></span></td>
+                        <td class="business-status" th:text="${b.active ? 'Active' : 'Inactive'}"></td>
+                        <td><input class="warranty-date" type="date" th:value="${b.warrantyDate}"></td>
+                        <td>
+                            <button type="button" class="business-toggle"
+                                    th:text="${b.active ? 'Deactivate' : 'Activate'}">Deactivate
+                            </button>
+                            <button type="button" class="warranty-save">Update date</button>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(businesses)}">
+                        <td colspan="6">No business information found.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <section class="admin-section" id="templates"><h2>Templates of all businesses</h2>
+            <form class="admin-form" id="templateAdd"><input name="businessId" placeholder="Business ID" required><input
+                    name="templateName" placeholder="Template name" required><input name="imageUrl"
+                                                                                    placeholder="Image URL (optional)">
+                <button type="submit">Add template</button>
+            </form>
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                    <tr>
+                        <th>Business ID</th>
+                        <th>Template name</th>
+                        <th>Image URL</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="t : ${templates}" th:attr="data-template-id=${t.id}">
+                        <td th:text="${t.businessId}"></td>
+                        <td><input class="template-name" th:value="${t.name}"></td>
+                        <td><input class="template-image" th:value="${t.imageUrl}" placeholder="Image URL"></td>
+                        <td>
+                            <button type="button" class="template-save">Save</button>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(templates)}">
+                        <td colspan="4">No templates found.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <section class="admin-section" id="configurations"><h2>WhatsApp configuration of all businesses</h2>
+            <form class="admin-form" id="configAdd"><input name="businessId" placeholder="Business ID" required><input
+                    name="phoneNumberId" placeholder="Phone Number ID"><input name="wabaId" placeholder="WABA ID"><input
+                    name="accessToken" placeholder="Access token">
+                <button type="submit">Add configuration</button>
+            </form>
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                    <tr>
+                        <th>Business ID</th>
+                        <th>Phone Number ID</th>
+                        <th>WABA ID</th>
+                        <th>Updated</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody id="configRows">
+                    <tr>
+                        <td colspan="5">Loading…</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <p id="adminResult" class="admin-result muted" role="status"></p></main>
+</div>
+<script>
+    const csrf=document.querySelector('input[name="_csrf"]')?.value||'';
+    async function api(url,method,body){const response=await fetch(url,{method,headers:{'Content-Type':'application/json','X-CSRF-TOKEN':csrf},body:body===undefined?undefined:JSON.stringify(body)});const raw=await response.text();let data={};try{data=raw?JSON.parse(raw):{}}catch{}if(!response.ok)throw new Error(data.message||data.error||raw||('HTTP '+response.status));return data;}
+    function showResult(message,isError=false){const el=document.getElementById('adminResult');el.textContent=message;el.style.color=isError?'#b42318':'#087c43';}
+    document.querySelectorAll('tr[data-business-id]').forEach(row=>{const id=row.dataset.businessId;let active=row.dataset.active==='true';row.querySelector('.business-toggle').addEventListener('click',async()=>{try{await api('/admin/api/business/'+encodeURIComponent(id),'PUT',{isActive:!active});active=!active;row.dataset.active=String(active);row.querySelector('.business-status').textContent=active?'Active':'Inactive';row.querySelector('.business-toggle').textContent=active?'Deactivate':'Activate';showResult('Business '+id+' is now '+(active?'active':'inactive')+'.');}catch(e){showResult(e.message,true);}});row.querySelector('.warranty-save').addEventListener('click',async()=>{try{const date=row.querySelector('.warranty-date').value;if(!date)throw new Error('Select a warranty updated date.');await api('/admin/api/business/'+encodeURIComponent(id),'PUT',{warrantyUpdatedAt:date});showResult('Warranty updated date saved for '+id+'.');}catch(e){showResult(e.message,true);}});});
+    document.querySelectorAll('tr[data-template-id]').forEach(row=>row.querySelector('.template-save').addEventListener('click',async()=>{try{await api('/admin/api/templates/'+encodeURIComponent(row.dataset.templateId),'PUT',{templateName:row.querySelector('.template-name').value,imageUrl:row.querySelector('.template-image').value});showResult('Template updated in portal_business_templates.');}catch(e){showResult(e.message,true);}}));
+    document.getElementById('templateAdd').addEventListener('submit',async e=>{e.preventDefault();try{await api('/admin/api/templates','POST',Object.fromEntries(new FormData(e.target)));showResult('Template added to portal_business_templates.');location.reload();}catch(x){showResult(x.message,true);}});
+    document.getElementById('configAdd').addEventListener('submit',async e=>{e.preventDefault();try{await api('/admin/api/configurations','POST',Object.fromEntries(new FormData(e.target)));showResult('WhatsApp configuration added.');location.reload();}catch(x){showResult(x.message,true);}});
+    (async()=>{const tbody=document.getElementById('configRows');try{const response=await fetch('/admin/api/configurations');if(!response.ok)throw new Error('Could not load WhatsApp configurations.');const rows=await response.json();tbody.innerHTML='';if(!rows.length){tbody.innerHTML='<tr><td colspan="5">No configurations found.</td></tr>';return;}rows.forEach(config=>{const tr=document.createElement('tr');[config.businessId,config.phoneNumberId,config.wabaId,config.updatedAt].forEach(value=>{const td=document.createElement('td');td.textContent=value??'';tr.appendChild(td);});const action=document.createElement('td');const button=document.createElement('button');button.textContent='Edit';button.addEventListener('click',async()=>{const json=prompt('Edit configuration fields as JSON. Sensitive values are visible to administrators.',JSON.stringify(config,null,2));if(json===null)return;try{const body=JSON.parse(json);await api('/admin/api/configurations/'+encodeURIComponent(config.id),'PUT',body);showResult('WhatsApp configuration updated.');location.reload();}catch(error){showResult(error.message,true);}});action.appendChild(button);tr.appendChild(action);tbody.appendChild(tr);});}catch(error){tbody.innerHTML='<tr><td colspan="5">'+error.message+'</td></tr>';showResult(error.message,true);}})();
+</script>
+</body>
+</html>
